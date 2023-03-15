@@ -1,7 +1,10 @@
 # Import modules
 import pygame
 import math
+import numpy as np
+import struct
 import random
+import socket
 pygame.init()
 
 # Initialize constants
@@ -20,6 +23,11 @@ player_max_rtspd = 10
 bullet_speed = 15
 saucer_speed = 5
 small_saucer_accuracy = 10
+
+# Initialize UDP receive and send sockets
+send_force = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+receive_position = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+receive_position.bind(("127.0.0.1", 50505))
 
 # Make surface and display
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -370,8 +378,23 @@ def gameLoop(startingState):
     player = Player(display_width / 2, display_height / 2)
     saucer = Saucer()
 
+    # Send a UDP dummy command
+    msg = np.zeros(2)
+    send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
+    send_force.sendto(send_data, ("127.0.0.1", 50506))
+
     # Main loop
     while gameState != "Exit":
+        # try:
+        #     # Receive UDP commanded position
+        #     data, address = receive_position.recvfrom(32)
+        #     position = np.array(struct.unpack("2f", data), dtype=np.float32)
+        #     print("Received commanded position: {pos}".format(pos=position))
+        # except:
+        #     print("UDP connection broken, quitting...")
+        #     gameState = "Exit"
+        #     break
+
         # Game menu
         while gameState == "Menu":
             gameDisplay.fill(black)
@@ -411,6 +434,11 @@ def gameLoop(startingState):
                     player.thrust = False
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     player.rtspd = 0
+        
+        # ## NEW
+        # if len(bullets) < bullet_capacity:
+        #     bullets.append(Bullet(player.x, player.y, player.dir))
+        #     pygame.mixer.Sound.play(snd_fire)
 
         # Update player
         player.updatePlayer()
@@ -716,6 +744,16 @@ def gameLoop(startingState):
         # Tick fps
         timer.tick(30)
 
+        # Send UDP force feedback
+        # TODO This is still a dummy packet now
+        force_msg = np.zeros(2)
+        send_data = bytearray(struct.pack("=%sf" % force_msg.size, *force_msg))
+        send_force.sendto(send_data, ("127.0.0.1", 50506))
+
+# Close all sockets, and send that you are closing to the receiving end
+send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50506))
+send_force.close()
+receive_position.close()
 
 # Start game
 gameLoop("Menu")
