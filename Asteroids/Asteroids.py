@@ -385,15 +385,16 @@ def gameLoop(startingState):
 
     # Main loop
     while gameState != "Exit":
-        # try:
-        #     # Receive UDP commanded position
-        #     data, address = receive_position.recvfrom(32)
-        #     position = np.array(struct.unpack("2f", data), dtype=np.float32)
-        #     print("Received commanded position: {pos}".format(pos=position))
-        # except:
-        #     print("UDP connection broken, quitting...")
-        #     gameState = "Exit"
-        #     break
+        # noinspection PyBroadException
+        try:
+            # Receive UDP commanded position
+            data, address = receive_position.recvfrom(32)
+            position = np.array(struct.unpack("2f", data), dtype=np.float32)
+            print("Received commanded position: {pos}".format(pos=position))
+        except:
+            print("UDP connection broken, quitting...")
+            gameState = "Exit"
+            break
 
         # Game menu
         while gameState == "Menu":

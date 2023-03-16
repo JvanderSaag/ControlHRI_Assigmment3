@@ -174,14 +174,15 @@ send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
 send_position.sendto(send_data, ("127.0.0.1", 50505))
 
 while run:
-    # try:
-    #     # Receive a force feedback UDP package
-    #     data, address = receive_force.recvfrom(32)
-    #     force = np.array(struct.unpack("2f", data), dtype=np.float32)
-    #     print("Received commanded position: {force}".format(force=force))
-    # except:
-    #     print("UDP connection broken, quitting...")
-    #     run = False
+    # noinspection PyBroadException
+    try:
+        # Receive a force feedback UDP package
+        data, address = receive_force.recvfrom(32)
+        force = np.array(struct.unpack("2f", data), dtype=np.float32)
+        print("Received commanded position: {force}".format(force=force))
+    except:
+        print("UDP connection broken, quitting...")
+        run = False
 
     #########Process events  (Mouse, Keyboard etc...)#########
     for event in pygame.event.get():
