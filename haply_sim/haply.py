@@ -50,9 +50,9 @@ import struct, socket
 ##################### General Pygame Init #####################
 ##initialize pygame window
 pygame.init()
-window = pygame.display.set_mode((800, 600))   ##twice 600x400 for haptic and VR
+window = pygame.display.set_mode((600, 400))   ##twice 600x400 for haptic and VR
 pygame.display.set_caption('Virtual Haptic Device')
-screenHaptics = pygame.Surface((800,600))
+screenHaptics = pygame.Surface((600, 400))
 
 ##add nice icon from https://www.flaticon.com/authors/vectors-market
 icon = pygame.image.load('haply_sim/robot.png')
@@ -86,8 +86,8 @@ cOrange = (255,100,0)
 cYellow = (255,255,0)
 
 ####Pseudo-haptics dynamic parameters, k/b needs to be <1
-K = np.diag([0, 0])
-B = np.diag([0.1, 0.1])
+K = np.diag([0.1, 0.1])
+B = np.diag([0.1, 0.1]) # CANNOT BE ZER
 
 ##################### Define sprites #####################
 
