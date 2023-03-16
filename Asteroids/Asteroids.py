@@ -24,7 +24,7 @@ display_height = 600
 
 player_size = 10
 fd_fric = 0.2
-bd_fric = 0.1
+bd_fric = 0.3
 player_max_speed = 20
 player_max_rtspd = 10
 bullet_speed = 15
@@ -59,7 +59,7 @@ xc, yc = gameDisplay.get_rect().center # window center
 window_scale = 800
 vector_1 = np.array([xc, yc])
 trans_matrix = np.array([[1.33, 0], [0, 1.5]])
-control_range = 2
+control_range = 10
 
 # Create function to draw texts
 def drawText(msg, color, x, y, s, center=True):
@@ -297,8 +297,22 @@ class Player:
                 self.hspeed = player_max_speed * math.cos(self.dir * math.pi / 180)
                 self.vspeed = player_max_speed * math.sin(self.dir * math.pi / 180)
         else:
-            self.hspeed = 0
-            self.vspeed = 0
+            if speed - bd_fric > 0:
+                change_in_hspeed = (bd_fric * math.cos(self.vspeed / self.hspeed))
+                change_in_vspeed = (bd_fric * math.sin(self.vspeed / self.hspeed))
+                if self.hspeed != 0:
+                    if change_in_hspeed / abs(change_in_hspeed) == self.hspeed / abs(self.hspeed):
+                        self.hspeed -= change_in_hspeed
+                    else:
+                        self.hspeed += change_in_hspeed
+                if self.vspeed != 0:
+                    if change_in_vspeed / abs(change_in_vspeed) == self.vspeed / abs(self.vspeed):
+                        self.vspeed -= change_in_vspeed
+                    else:
+                        self.vspeed += change_in_vspeed
+            else:
+                self.hspeed = 0
+                self.vspeed = 0
 
         self.x += self.hspeed
         self.y += self.vspeed
