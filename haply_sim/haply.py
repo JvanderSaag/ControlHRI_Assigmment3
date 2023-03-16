@@ -36,9 +36,9 @@ e-mail: {m.wiertlewski,l.willemet,m.a.a.atalla}@tudelft.nl
 
 import pygame
 import numpy as np
-from haply_sim.pantograph import Pantograph
-from haply_sim.pyhapi import Board, Device, Mechanisms
-from haply_sim.pshape import PShape
+from pantograph import Pantograph
+from pyhapi import Board, Device, Mechanisms
+from pshape import PShape
 import serial
 from serial.tools import list_ports
 import time
@@ -165,7 +165,7 @@ robotToggle = True
 # Send a dummy UDP package
 msg = np.zeros(2)
 send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
-send_position.sendto(send_data, ("127.0.0.1", 50505))
+send_position.sendto(send_data, ("127.0.0.1", 50503))
 
 while run:
     # noinspection PyBroadException
@@ -173,7 +173,7 @@ while run:
         # Receive a force feedback UDP package
         data, address = receive_force.recvfrom(32)
         force = np.array(struct.unpack("2f", data), dtype=np.float32)
-        print("Received commanded position: {force}".format(force=force))
+        print("Received commanded force: {force}".format(force=force))
     except:
         print("UDP connection broken, quitting...")
         run = False
@@ -292,10 +292,10 @@ while run:
     # TODO This is still a dummy packet now
     position_msg = np.zeros(2)
     send_data = bytearray(struct.pack("=%sf" % position_msg.size, *position_msg))
-    send_position.sendto(send_data, ("127.0.0.1", 50505))
+    send_position.sendto(send_data, ("127.0.0.1", 50503))
 
 # Close all sockets, and send that you are closing to the receiving end
-send_position.sendto("close".encode('utf-8'), ("127.0.0.1", 50505))
+send_position.sendto("close".encode('utf-8'), ("127.0.0.1", 50503))
 send_position.close()
 receive_force.close()
 

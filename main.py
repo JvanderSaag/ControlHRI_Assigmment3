@@ -1,13 +1,5 @@
-import Asteroids.Asteroids
-import haply_sim.haply
 import subprocess
 
-
-hap = subprocess.Popen(["haply.py"], shell=True)
-ast = subprocess.Popen(["Asteroids.py"], shell=True)
-
-
-while True:
-    print("Running")
+subprocess.run("python3 Asteroids/Asteroids.py & python3 haply_sim/haply.py", shell=True)
 
 

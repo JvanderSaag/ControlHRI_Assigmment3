@@ -33,7 +33,7 @@ send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
 send_force.sendto(send_data, ("127.0.0.1", 50504))
 
 receive_position = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_position.bind(("127.0.0.1", 50505))
+receive_position.bind(("127.0.0.1", 50503))
 
 # Make surface and display
 gameDisplay = pygame.display.set_mode((display_width, display_height))
