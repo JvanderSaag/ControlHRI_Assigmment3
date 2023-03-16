@@ -43,9 +43,14 @@ import serial
 from serial.tools import list_ports
 import time
 import struct, socket
+import os
 
 ##################### General Pygame Init #####################
 ##initialize pygame window
+x = 900
+y = 150
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
+
 pygame.init()
 window = pygame.display.set_mode((600, 400))
 pygame.display.set_caption('Virtual Haptic Device')
@@ -291,7 +296,7 @@ while run:
 
     # Send position via UDP to Asteroids
     # TODO This is still a dummy packet now
-    position_msg = np.array([xh[0] - xc, xh[1] - yc])
+    position_msg = np.array([xh[0], xh[1]])
     send_data = bytearray(struct.pack("=%sf" % position_msg.size, *position_msg))
     send_position.sendto(send_data, ("127.0.0.1", 50503))
 

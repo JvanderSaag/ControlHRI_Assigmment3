@@ -5,6 +5,12 @@ import numpy as np
 import struct
 import random
 import socket
+import os
+
+
+x = 20
+y = 150
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
 
 pygame.init()
 
@@ -17,7 +23,7 @@ display_width = 800
 display_height = 600
 
 player_size = 10
-fd_fric = 0.5
+fd_fric = 0.2
 bd_fric = 0.1
 player_max_speed = 20
 player_max_rtspd = 10
@@ -49,6 +55,11 @@ snd_extra = pygame.mixer.Sound("Asteroids/Sounds/extra.wav")
 snd_saucerB = pygame.mixer.Sound("Asteroids/Sounds/saucerBig.wav")
 snd_saucerS = pygame.mixer.Sound("Asteroids/Sounds/saucerSmall.wav")
 
+xc, yc = gameDisplay.get_rect().center # window center
+window_scale = 800
+vector_1 = np.array([xc, yc])
+trans_matrix = np.array([[1.33, 0], [0, 1.5]])
+control_range = 5
 
 # Create function to draw texts
 def drawText(msg, color, x, y, s, center=True):
@@ -286,22 +297,9 @@ class Player:
                 self.hspeed = player_max_speed * math.cos(self.dir * math.pi / 180)
                 self.vspeed = player_max_speed * math.sin(self.dir * math.pi / 180)
         else:
-            if speed - bd_fric > 0:
-                change_in_hspeed = (bd_fric * math.cos(self.vspeed / self.hspeed))
-                change_in_vspeed = (bd_fric * math.sin(self.vspeed / self.hspeed))
-                if self.hspeed != 0:
-                    if change_in_hspeed / abs(change_in_hspeed) == self.hspeed / abs(self.hspeed):
-                        self.hspeed -= change_in_hspeed
-                    else:
-                        self.hspeed += change_in_hspeed
-                if self.vspeed != 0:
-                    if change_in_vspeed / abs(change_in_vspeed) == self.vspeed / abs(self.vspeed):
-                        self.vspeed -= change_in_vspeed
-                    else:
-                        self.vspeed += change_in_vspeed
-            else:
-                self.hspeed = 0
-                self.vspeed = 0
+            self.hspeed = 0
+            self.vspeed = 0
+
         self.x += self.hspeed
         self.y += self.vspeed
 
@@ -372,7 +370,7 @@ def gameLoop(startingState):
     player_invi_dur = 0
     hyperspace = 0
     next_level_delay = 0
-    bullet_capacity = 4
+    bullet_capacity = 2
     bullets = []
     asteroids = []
     stage = 3
@@ -418,33 +416,26 @@ def gameLoop(startingState):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gameState = "Exit"
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    player.thrust = True
-                if event.key == pygame.K_LEFT:
-                    player.rtspd = -player_max_rtspd
-                if event.key == pygame.K_RIGHT:
-                    player.rtspd = player_max_rtspd
-                if event.key == pygame.K_SPACE and player_dying_delay == 0 and len(bullets) < bullet_capacity:
-                    bullets.append(Bullet(player.x, player.y, player.dir))
-                    # Play SFX
-                    pygame.mixer.Sound.play(snd_fire)
                 if gameState == "Game Over":
                     if event.key == pygame.K_r:
                         gameState = "Exit"
                         gameLoop("Playing")
                 if event.key == pygame.K_LSHIFT:
                     hyperspace = 30
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    player.thrust = False
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    player.rtspd = 0
 
-        # ## NEW
-        # if len(bullets) < bullet_capacity:
-        #     bullets.append(Bullet(player.x, player.y, player.dir))
-        #     pygame.mixer.Sound.play(snd_fire)
+        vector_2 = trans_matrix @ np.array([position[0], position[1]])
+        player.dir = math.degrees(math.atan2(vector_2[1]-vector_1[1], vector_2[0]-vector_1[0]))
+
+        diff_xy = vector_2 - vector_1
+        if diff_xy[0] > control_range and diff_xy[1] > control_range or diff_xy[0] < -control_range and diff_xy[1] < -control_range\
+                or diff_xy[0] < -control_range and diff_xy[1] > control_range or diff_xy[0] > control_range and diff_xy[1] < -control_range:
+            player.thrust = True
+        else:
+            player.thrust = False
+
+        if len(bullets) < bullet_capacity:
+            bullets.append(Bullet(player.x, player.y, player.dir))
+            pygame.mixer.Sound.play(snd_fire)
 
         # Update player
         player.updatePlayer()
