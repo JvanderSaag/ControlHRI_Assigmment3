@@ -1,11 +1,13 @@
-import haply_sim.haply
 import Asteroids.Asteroids
+import haply_sim.haply
 import subprocess
-import sys
 
-sys.path.append("/Asteroids")
-sys.path.append("/haply_sim")
 
-subprocess.Popen(["python", "haply.py"])
-subprocess.Popen(["python", "Asteroids.py"])
+hap = subprocess.Popen(["haply.py"], shell=True)
+ast = subprocess.Popen(["Asteroids.py"], shell=True)
+
+
+while True:
+    print("Running")
+
 

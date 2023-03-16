@@ -36,9 +36,9 @@ e-mail: {m.wiertlewski,l.willemet,m.a.a.atalla}@tudelft.nl
 
 import pygame
 import numpy as np
-from pantograph import Pantograph
-from pyhapi import Board, Device, Mechanisms
-from pshape import PShape
+from haply_sim.pantograph import Pantograph
+from haply_sim.pyhapi import Board, Device, Mechanisms
+from haply_sim.pshape import PShape
 import serial
 from serial.tools import list_ports
 import time
@@ -72,7 +72,7 @@ FPS = 100  # in Hertz
 # Initialize UDP connection with Asteroids game
 send_position = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 receive_force = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_force.bind(("127.0.0.1", 50506))
+receive_force.bind(("127.0.0.1", 50504))
 
 ##define some colors
 cWhite = (255, 255, 255)

@@ -5,6 +5,7 @@ import numpy as np
 import struct
 import random
 import socket
+
 pygame.init()
 
 # Initialize constants
@@ -26,6 +27,11 @@ small_saucer_accuracy = 10
 
 # Initialize UDP receive and send sockets
 send_force = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+msg = np.zeros(2)
+send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
+send_force.sendto(send_data, ("127.0.0.1", 50504))
+
 receive_position = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 receive_position.bind(("127.0.0.1", 50505))
 
@@ -35,13 +41,13 @@ pygame.display.set_caption("Asteroids")
 timer = pygame.time.Clock()
 
 # Import sound effects
-snd_fire = pygame.mixer.Sound("Sounds/fire.wav")
-snd_bangL = pygame.mixer.Sound("Sounds/bangLarge.wav")
-snd_bangM = pygame.mixer.Sound("Sounds/bangMedium.wav")
-snd_bangS = pygame.mixer.Sound("Sounds/bangSmall.wav")
-snd_extra = pygame.mixer.Sound("Sounds/extra.wav")
-snd_saucerB = pygame.mixer.Sound("Sounds/saucerBig.wav")
-snd_saucerS = pygame.mixer.Sound("Sounds/saucerSmall.wav")
+snd_fire = pygame.mixer.Sound("Asteroids/Sounds/fire.wav")
+snd_bangL = pygame.mixer.Sound("Asteroids/Sounds/bangLarge.wav")
+snd_bangM = pygame.mixer.Sound("Asteroids/Sounds/bangMedium.wav")
+snd_bangS = pygame.mixer.Sound("Asteroids/Sounds/bangSmall.wav")
+snd_extra = pygame.mixer.Sound("Asteroids/Sounds/extra.wav")
+snd_saucerB = pygame.mixer.Sound("Asteroids/Sounds/saucerBig.wav")
+snd_saucerS = pygame.mixer.Sound("Asteroids/Sounds/saucerSmall.wav")
 
 
 # Create function to draw texts
@@ -271,7 +277,7 @@ class Player:
 
     def updatePlayer(self):
         # Move player
-        speed = math.sqrt(self.hspeed**2 + self.vspeed**2)
+        speed = math.sqrt(self.hspeed ** 2 + self.vspeed ** 2)
         if self.thrust:
             if speed + fd_fric < player_max_speed:
                 self.hspeed += fd_fric * math.cos(self.dir * math.pi / 180)
@@ -381,7 +387,7 @@ def gameLoop(startingState):
     # Send a UDP dummy command
     msg = np.zeros(2)
     send_data = bytearray(struct.pack("=%sf" % msg.size, *msg))
-    send_force.sendto(send_data, ("127.0.0.1", 50506))
+    send_force.sendto(send_data, ("127.0.0.1", 50504))
 
     # Main loop
     while gameState != "Exit":
@@ -394,7 +400,6 @@ def gameLoop(startingState):
         except:
             print("UDP connection broken, quitting...")
             gameState = "Exit"
-            break
 
         # Game menu
         while gameState == "Menu":
@@ -435,7 +440,7 @@ def gameLoop(startingState):
                     player.thrust = False
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     player.rtspd = 0
-        
+
         # ## NEW
         # if len(bullets) < bullet_capacity:
         #     bullets.append(Bullet(player.x, player.y, player.dir))
@@ -467,8 +472,10 @@ def gameLoop(startingState):
             if player_state != "Died":
                 if isColliding(player.x, player.y, a.x, a.y, a.size):
                     # Create ship fragments
-                    player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
-                    player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                    player_pieces.append(
+                        deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                    player_pieces.append(
+                        deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
                     player_pieces.append(deadPlayer(player.x, player.y, player_size))
 
                     # Kill player
@@ -538,7 +545,8 @@ def gameLoop(startingState):
         else:
             # Set saucer targer dir
             acc = small_saucer_accuracy * 4 / stage
-            saucer.bdir = math.degrees(math.atan2(-saucer.y + player.y, -saucer.x + player.x) + math.radians(random.uniform(acc, -acc)))
+            saucer.bdir = math.degrees(
+                math.atan2(-saucer.y + player.y, -saucer.x + player.x) + math.radians(random.uniform(acc, -acc)))
 
             saucer.updateSaucer()
             saucer.drawSaucer()
@@ -587,8 +595,10 @@ def gameLoop(startingState):
             if isColliding(saucer.x, saucer.y, player.x, player.y, saucer.size):
                 if player_state != "Died":
                     # Create ship fragments
-                    player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
-                    player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                    player_pieces.append(
+                        deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                    player_pieces.append(
+                        deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
                     player_pieces.append(deadPlayer(player.x, player.y, player_size))
 
                     # Kill player
@@ -638,8 +648,10 @@ def gameLoop(startingState):
                 if isColliding(player.x, player.y, b.x, b.y, 5):
                     if player_state != "Died":
                         # Create ship fragments
-                        player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
-                        player_pieces.append(deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                        player_pieces.append(
+                            deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
+                        player_pieces.append(
+                            deadPlayer(player.x, player.y, 5 * player_size / (2 * math.cos(math.atan(1 / 3)))))
                         player_pieces.append(deadPlayer(player.x, player.y, player_size))
 
                         # Kill player
@@ -749,15 +761,16 @@ def gameLoop(startingState):
         # TODO This is still a dummy packet now
         force_msg = np.zeros(2)
         send_data = bytearray(struct.pack("=%sf" % force_msg.size, *force_msg))
-        send_force.sendto(send_data, ("127.0.0.1", 50506))
+        send_force.sendto(send_data, ("127.0.0.1", 50504))
 
-# Close all sockets, and send that you are closing to the receiving end
-send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50506))
-send_force.close()
-receive_position.close()
 
 # Start game
 gameLoop("Menu")
+
+# Close all sockets, and send that you are closing to the receiving end
+send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50504))
+send_force.close()
+receive_position.close()
 
 # End game
 pygame.quit()
