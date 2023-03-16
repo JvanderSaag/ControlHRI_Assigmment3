@@ -36,12 +36,10 @@ e-mail: {m.wiertlewski,l.willemet,m.a.a.atalla}@tudelft.nl
 
 import pygame
 import numpy as np
-import math
-import matplotlib.pyplot as plt
 from pantograph import Pantograph
 from pyhapi import Board, Device, Mechanisms
 from pshape import PShape
-import sys, serial, glob
+import serial
 from serial.tools import list_ports
 import time
 import struct, socket
