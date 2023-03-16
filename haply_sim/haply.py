@@ -36,9 +36,9 @@ e-mail: {m.wiertlewski,l.willemet,m.a.a.atalla}@tudelft.nl
 
 import pygame
 import numpy as np
-from pantograph import Pantograph
-from pyhapi import Board, Device, Mechanisms
-from pshape import PShape
+from haply_sim.pantograph import Pantograph
+from haply_sim.pyhapi import Board, Device, Mechanisms
+from haply_sim.pshape import PShape
 import serial
 from serial.tools import list_ports
 import time
