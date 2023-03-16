@@ -59,7 +59,7 @@ xc, yc = gameDisplay.get_rect().center # window center
 window_scale = 800
 vector_1 = np.array([xc, yc])
 trans_matrix = np.array([[1.33, 0], [0, 1.5]])
-control_range = 5
+control_range = 2
 
 # Create function to draw texts
 def drawText(msg, color, x, y, s, center=True):
