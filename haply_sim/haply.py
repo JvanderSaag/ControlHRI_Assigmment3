@@ -47,7 +47,7 @@ import struct, socket
 ##################### General Pygame Init #####################
 ##initialize pygame window
 pygame.init()
-window = pygame.display.set_mode((600, 400))  ##twice 600x400 for haptic and VR
+window = pygame.display.set_mode((600, 400))
 pygame.display.set_caption('Virtual Haptic Device')
 screenHaptics = pygame.Surface((600, 400))
 
@@ -83,8 +83,8 @@ cOrange = (255, 100, 0)
 cYellow = (255, 255, 0)
 
 ####Pseudo-haptics dynamic parameters, k/b needs to be <1
-K = np.diag([0.1, 0.1])
-B = np.diag([0.1, 0.1])  # CANNOT BE ZER
+K = np.diag([0.2, 0.2])
+B = np.diag([0.3, 0.3])  # CANNOT BE ZERO
 
 ##################### Define sprites #####################
 
@@ -223,6 +223,10 @@ while run:
     fe = np.zeros(2)  ##Environment forqe is set to 0 initially.
 
     ######### Compute forces ########
+    xc, yc = screenHaptics.get_rect().center ##center of the screen
+    
+    ######### Compute forces ########
+    fe += K @ (xh - np.array([xc, yc])) / window_scale
 
     '''*********** !Student should fill in ***********'''
     ##Update old samples for velocity computation
@@ -255,12 +259,10 @@ while run:
     screenHaptics.fill(cWhite)
 
     ##Change color based on effort
-    colorMaster = (255, 255 - np.clip(np.linalg.norm(np.linalg.norm(K) * (xm - xh) / window_scale) * 15, 0, 255),
-                   255 - np.clip(np.linalg.norm(np.linalg.norm(K) * (xm - xh) / window_scale) * 15, 0,
+    colorMaster = (255, 255 - np.clip(np.linalg.norm(fe / window_scale) * 15, 0, 255),
+                   255 - np.clip(np.linalg.norm(fe / window_scale) * 15, 0,
                                  255))  # if collide else (255, 255, 255)
-    # print(np.linalg.norm(np.linalg.norm(K)*(xm-xh)/window_scale)*15, np.clip(np.linalg.norm(np.linalg.norm(K)*(xm-xh)/window_scale)*15,0,255))
-
-    # pygame.draw.rect(screenHaptics, colorMaster, haptic,border_radius=4)
+    pygame.draw.rect(screenHaptics, colorMaster, haptic,border_radius=4)
 
     ######### Robot visualization ###################
     # update individual link position
@@ -273,7 +275,6 @@ while run:
 
     ##Fuse it back together
     window.blit(screenHaptics, (0, 0))
-    # window.blit(screenVR, (600,0))
 
     ##Print status in  overlay
     if debugToggle:
@@ -290,7 +291,7 @@ while run:
 
     # Send position via UDP to Asteroids
     # TODO This is still a dummy packet now
-    position_msg = np.zeros(2)
+    position_msg = np.array([xh[0] - xc, xh[1] - yc])
     send_data = bytearray(struct.pack("=%sf" % position_msg.size, *position_msg))
     send_position.sendto(send_data, ("127.0.0.1", 50503))
 
