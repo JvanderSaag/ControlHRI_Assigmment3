@@ -17,6 +17,8 @@ pygame.init()
 # Initialize constants
 white = (255, 255, 255)
 red = (255, 0, 0)
+orange = (255, 140, 0)
+green = (0, 255, 0)
 black = (0, 0, 0)
 
 display_width = 800
@@ -62,13 +64,36 @@ trans_matrix = np.array([[1.33, 0], [0, 1.5]])
 radius = 30
 
 # Analysis variables
-START_TIME = None
-TIME_ALIVE = 0
+START_TIME = 0
+TIME_ALIVE = None
 ASTEROIDS_HIT = 0
 SAUCERS_HIT = 0
 SCORE = 0
 POSITIONS = []
-DISTANCE_TRAVELLED = 0
+VELOCITIES = []
+DISTANCE_TRAVELLED = None
+
+
+def calculate_distance(positions):
+    distance_travelled = 0
+    p_prev = positions[0]
+
+    for pos in positions:
+        distance_travelled += np.sqrt((pos[0] - p_prev[0])**2 + (pos[1] - p_prev[1])**2)
+        p_prev = pos
+
+    return distance_travelled
+
+
+def calculate_max_velocity(velocities):
+    max_vel = 0
+
+    for vel in velocities:
+        magnitude = np.sqrt(vel[0]**2 + vel[1]**2)
+        if magnitude > max_vel:
+            max_vel = magnitude
+
+    return max_vel
 
 
 # Create function to draw texts
@@ -84,7 +109,7 @@ def drawText(msg, color, x, y, s, center=True):
 
 # Create funtion to chek for collision
 def isColliding(x, y, xTo, yTo, size):
-    if x > xTo - size and x < xTo + size and y > yTo - size and y < yTo + size:
+    if xTo - size < x < xTo + size and yTo - size < y < yTo + size:
         return True
     return False
 
@@ -347,28 +372,28 @@ class Player:
         s = player_size
         t = self.thrust
         # Draw player
-        pygame.draw.line(gameDisplay, white,
+        pygame.draw.line(gameDisplay, red,
                          (x - (s * math.sqrt(130) / 12) * math.cos(math.atan(7 / 9) + a),
                           y - (s * math.sqrt(130) / 12) * math.sin(math.atan(7 / 9) + a)),
                          (x + s * math.cos(a), y + s * math.sin(a)))
 
-        pygame.draw.line(gameDisplay, white,
+        pygame.draw.line(gameDisplay, red,
                          (x - (s * math.sqrt(130) / 12) * math.cos(math.atan(7 / 9) - a),
                           y + (s * math.sqrt(130) / 12) * math.sin(math.atan(7 / 9) - a)),
                          (x + s * math.cos(a), y + s * math.sin(a)))
 
-        pygame.draw.line(gameDisplay, white,
+        pygame.draw.line(gameDisplay, red,
                          (x - (s * math.sqrt(2) / 2) * math.cos(a + math.pi / 4),
                           y - (s * math.sqrt(2) / 2) * math.sin(a + math.pi / 4)),
                          (x - (s * math.sqrt(2) / 2) * math.cos(-a + math.pi / 4),
                           y + (s * math.sqrt(2) / 2) * math.sin(-a + math.pi / 4)))
         if t:
-            pygame.draw.line(gameDisplay, white,
+            pygame.draw.line(gameDisplay, orange,
                              (x - s * math.cos(a),
                               y - s * math.sin(a)),
                              (x - (s * math.sqrt(5) / 4) * math.cos(a + math.pi / 6),
                               y - (s * math.sqrt(5) / 4) * math.sin(a + math.pi / 6)))
-            pygame.draw.line(gameDisplay, white,
+            pygame.draw.line(gameDisplay, orange,
                              (x - s * math.cos(-a),
                               y + s * math.sin(-a)),
                              (x - (s * math.sqrt(5) / 4) * math.cos(-a + math.pi / 6),
@@ -390,6 +415,7 @@ def gameLoop(startingState):
     global ASTEROIDS_HIT
     global SAUCERS_HIT
     global POSITIONS
+    global VELOCITIES
 
     # Init variables
     gameState = startingState
@@ -454,6 +480,10 @@ def gameLoop(startingState):
             elif event.type == pygame.KEYUP:
                 if event.key == ord('q'):  ##Force to quit
                     gameState = "Exit"
+
+        # Keep track of players positions and velocities
+        POSITIONS.append(np.array([player.x, player.y]))
+        VELOCITIES.append(np.array([player.hspeed, player.vspeed]))
 
         vector_2 = trans_matrix @ np.array([position[0], position[1]])
         player.dir = math.degrees(math.atan2(vector_2[1] - vector_1[1], vector_2[0] - vector_1[0]))
@@ -610,6 +640,7 @@ def gameLoop(startingState):
 
                     # Set saucer state
                     saucer.state = "Dead"
+                    SAUCERS_HIT += 1
 
                     # Play SFX
                     pygame.mixer.Sound.play(snd_bangL)
@@ -710,7 +741,7 @@ def gameLoop(startingState):
 
             # Check for bullets collide w/ asteroid
             for a in asteroids:
-                if b.x > a.x - a.size and b.x < a.x + a.size and b.y > a.y - a.size and b.y < a.y + a.size:
+                if a.x - a.size < b.x < a.x + a.size and a.y - a.size < b.y < a.y + a.size:
                     # Split asteroid
                     if a.t == "Large":
                         asteroids.append(Asteroid(a.x, a.y, "Normal"))
@@ -729,6 +760,7 @@ def gameLoop(startingState):
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangS)
                     asteroids.remove(a)
+                    ASTEROIDS_HIT += 1
                     bullets.remove(b)
 
                     break
@@ -767,9 +799,9 @@ def gameLoop(startingState):
                 player.drawPlayer()
         else:
             break
-            drawText("Game Over", white, display_width / 2, display_height / 2, 100)
-            drawText("Press \"R\" to restart!", white, display_width / 2, display_height / 2 + 100, 50)
-            live = -1
+            # drawText("Game Over", white, display_width / 2, display_height / 2, 100)
+            # drawText("Press \"R\" to restart!", white, display_width / 2, display_height / 2 + 100, 50)
+            # live = -1
 
         # Draw SCORE
         drawText(str(SCORE), white, 60, 20, 40, False)
@@ -795,8 +827,16 @@ def gameLoop(startingState):
 gameLoop("Menu")
 
 TIME_ALIVE = time.time() - START_TIME
+DISTANCE_TRAVELLED = calculate_distance(POSITIONS)
+MAX_VELOCITY = calculate_max_velocity(VELOCITIES)
 print("TIME ALIVE: {t}".format(t=TIME_ALIVE))
 print("SCORE: {s}".format(s=SCORE))
+print("ASTEROIDS HIT: {ast_hit}".format(ast_hit=ASTEROIDS_HIT))
+print("SAUCERS HIT: {sauce_hit}".format(sauce_hit=SAUCERS_HIT))
+print("DISTANCE TRAVELLED: {dist}".format(dist=DISTANCE_TRAVELLED))
+print("MAX VELOCITY: {max_vel}".format(max_vel=MAX_VELOCITY))
+
+# TODO write these to a file specified before the run
 
 # Close all sockets, and send that you are closing to the receiving end
 send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50504))
