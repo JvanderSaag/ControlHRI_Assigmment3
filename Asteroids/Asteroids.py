@@ -24,7 +24,7 @@ display_height = 600
 player_size = 10
 fd_fric = 0.2
 bd_fric = 0.3
-player_max_speed = 20
+player_max_speed = 10
 player_max_rtspd = 10
 bullet_speed = 15
 saucer_speed = 5
@@ -443,11 +443,10 @@ def gameLoop(startingState):
         vector_2 = trans_matrix @ np.array([position[0], position[1]])
         player.dir = math.degrees(math.atan2(vector_2[1] - vector_1[1], vector_2[0] - vector_1[0]))
 
-        diff_xy = vector_2 - vector_1
-        if diff_xy[0] > control_range and diff_xy[1] > control_range or diff_xy[0] < -control_range and diff_xy[
-            1] < -control_range \
-                or diff_xy[0] < -control_range and diff_xy[1] > control_range or diff_xy[0] > control_range and diff_xy[
-            1] < -control_range:
+        dx = abs(vector_2[0] - xc)
+        dy = abs(vector_2[1] - yc)
+
+        if dx > control_range or dy > control_range:
             player.thrust = True
         else:
             player.thrust = False
