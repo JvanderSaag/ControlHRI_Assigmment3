@@ -500,6 +500,8 @@ def gameLoop(startingState):
             bullets.append(Bullet(player.x, player.y, player.dir))
             pygame.mixer.Sound.play(snd_fire)
 
+        # print("hspeed: ", player.hspeed, "  vspeed: ", player.vspeed)
+
         # Update player
         player.updatePlayer()
 
@@ -816,7 +818,7 @@ def gameLoop(startingState):
 
         # Send UDP force feedback
         # TODO This is still a dummy packet now
-        force_msg = np.zeros(2)
+        force_msg = np.array([player.hspeed, player.vspeed])
         send_data = bytearray(struct.pack("=%sf" % force_msg.size, *force_msg))
         send_force.sendto(send_data, ("127.0.0.1", 50504))
 
