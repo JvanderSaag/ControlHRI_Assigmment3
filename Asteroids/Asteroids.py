@@ -466,6 +466,14 @@ def gameLoop(startingState):
             gameState = "Exit"
 
         # Game menu
+        clock = pygame.time.Clock()
+        counter = 5
+        font = pygame.font.SysFont(None, 300)
+        text = font.render(str(counter), True, (255, 255, 255))
+        timer_event = pygame.USEREVENT + 1
+        pygame.time.set_timer(timer_event, 1000)
+        counter_done = True
+
         while gameState == "Menu":
             gameDisplay.fill(black)
             drawText("ASTEROIDS", white, display_width / 2, display_height / 2, 100)
@@ -474,6 +482,24 @@ def gameLoop(startingState):
                 if event.type == pygame.QUIT:
                     gameState = "Exit"
                 if event.type == pygame.KEYDOWN:
+
+                    while counter_done:
+                        gameDisplay.fill(black)
+                        drawText("Center the haply device", white, display_width / 2, display_height / 10 + 100, 50)
+                        clock.tick(60)
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                run = False
+                            elif event.type == timer_event:
+                                counter -= 1
+                                text = font.render(str(counter), True, (255, 255, 255))
+                                if counter == 0:
+                                    pygame.time.set_timer(timer_event, 0)
+                                    counter_done = False
+                        text_rect = text.get_rect(center=gameDisplay.get_rect().center)
+                        gameDisplay.blit(text, text_rect)
+                        pygame.display.flip()
+
                     gameState = "Playing"
                     START_TIME = time.time()
             pygame.display.update()
