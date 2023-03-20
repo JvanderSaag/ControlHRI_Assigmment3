@@ -178,7 +178,7 @@ while run:
         # Receive a force feedback UDP package
         data, address = receive_force.recvfrom(32)
         force = np.array(struct.unpack("2f", data), dtype=np.float32)
-        print("Received commanded force: {force}".format(force=force))
+        # print("Received commanded force: {force}".format(force=force))
     except:
         print("UDP connection broken, quitting...")
         run = False

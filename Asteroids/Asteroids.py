@@ -7,10 +7,9 @@ import random
 import socket
 import os
 
-
 x = 20
 y = 150
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x, y)
 
 pygame.init()
 
@@ -55,11 +54,12 @@ snd_extra = pygame.mixer.Sound("Asteroids/Sounds/extra.wav")
 snd_saucerB = pygame.mixer.Sound("Asteroids/Sounds/saucerBig.wav")
 snd_saucerS = pygame.mixer.Sound("Asteroids/Sounds/saucerSmall.wav")
 
-xc, yc = gameDisplay.get_rect().center # window center
+xc, yc = gameDisplay.get_rect().center  # window center
 window_scale = 800
 vector_1 = np.array([xc, yc])
 trans_matrix = np.array([[1.33, 0], [0, 1.5]])
 control_range = 10
+
 
 # Create function to draw texts
 def drawText(msg, color, x, y, s, center=True):
@@ -408,7 +408,7 @@ def gameLoop(startingState):
             # Receive UDP commanded position
             data, address = receive_position.recvfrom(32)
             position = np.array(struct.unpack("2f", data), dtype=np.float32)
-            print("Received commanded position: {pos}".format(pos=position))
+            # print("Received commanded position: {pos}".format(pos=position))
         except:
             print("UDP connection broken, quitting...")
             gameState = "Exit"
@@ -436,13 +436,18 @@ def gameLoop(startingState):
                         gameLoop("Playing")
                 if event.key == pygame.K_LSHIFT:
                     hyperspace = 30
+            elif event.type == pygame.KEYUP:
+                if event.key == ord('q'):  ##Force to quit
+                    gameState = "Exit"
 
         vector_2 = trans_matrix @ np.array([position[0], position[1]])
-        player.dir = math.degrees(math.atan2(vector_2[1]-vector_1[1], vector_2[0]-vector_1[0]))
+        player.dir = math.degrees(math.atan2(vector_2[1] - vector_1[1], vector_2[0] - vector_1[0]))
 
         diff_xy = vector_2 - vector_1
-        if diff_xy[0] > control_range and diff_xy[1] > control_range or diff_xy[0] < -control_range and diff_xy[1] < -control_range\
-                or diff_xy[0] < -control_range and diff_xy[1] > control_range or diff_xy[0] > control_range and diff_xy[1] < -control_range:
+        if diff_xy[0] > control_range and diff_xy[1] > control_range or diff_xy[0] < -control_range and diff_xy[
+            1] < -control_range \
+                or diff_xy[0] < -control_range and diff_xy[1] > control_range or diff_xy[0] > control_range and diff_xy[
+            1] < -control_range:
             player.thrust = True
         else:
             player.thrust = False
