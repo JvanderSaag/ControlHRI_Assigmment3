@@ -92,9 +92,7 @@ K = np.diag([0.1, 0.1])
 B = np.diag([0.2, 0.2])  # CANNOT BE ZERO
 
 # Variables to determine input scaling and dead zone
-ongoingInput = False
 timerInput = 0
-timetilMaxThrust = 3
 K_gain = 1
 r_dead = 20
 
@@ -237,21 +235,21 @@ while run:
     xc, yc = screenHaptics.get_rect().center ##center of the screen
     
     dist_center = xh - np.array([xc, yc])
-    
+    fe += (K) @ (dist_center) / window_scale
 
     if np.linalg.norm(dist_center) > r_dead:
-        # Toggle ongoing Input
-        ongoingInput = True
         ######### Compute forces ########
-        if ongoingInput:
-            timerInput += 1/FPS
-            K_gain =  1 + 5 * np.exp(-timerInput)
+        if np.linalg.norm(force) != 0:
+            proj_vel = 0.5*(np.dot(fe, force)/np.linalg.norm(force)**2)*force
+            fe += proj_vel
+
+        # timerInput += 1/FPS
+        # K_gain =  1 + 5 * np.exp(-timerInput)
+        #fe += (K) @ (xh - (np.array([xc, yc]) + 25 * force)) / window_scale
     else:
         timerInput = 0
-        ongoingInput = False
         K_gain = 1
     
-    fe += (K_gain * K) @ (dist_center) / window_scale
     '''*********** !Student should fill in ***********'''
     ##Update old samples for velocity computation
     xhold = xh
@@ -296,7 +294,13 @@ while run:
     ### Hand visualisation
     screenHaptics.blit(hhandle, (haptic.topleft[0], haptic.topleft[1]))
     pygame.draw.line(screenHaptics, (0, 0, 0), (haptic.center), (haptic.center + 2 * np.linalg.norm(K) * (xm - xh)))
-
+   
+    # Velocity visualisation
+    pygame.draw.line(screenHaptics, (255, 0, 0), haptic.center, (haptic.center + 5*force), 5)
+    try:
+        pygame.draw.line(screenHaptics, (0, 0, 255), haptic.center, (haptic.center + 10*proj_vel), 5)
+    except:
+        pass
     ##Fuse it back together
     window.blit(screenHaptics, (0, 0))
 
