@@ -240,7 +240,7 @@ while run:
     if np.linalg.norm(dist_center) > r_dead:
         ######### Compute forces ########
         if np.linalg.norm(force) != 0:
-            proj_vel = 0.5*(np.dot(fe, force)/np.linalg.norm(force)**2)*force
+            proj_vel = -0.2*(np.dot(force, fe)/np.linalg.norm(fe)**2)*fe
             fe += proj_vel
 
         # timerInput += 1/FPS
