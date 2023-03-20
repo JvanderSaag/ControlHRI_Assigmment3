@@ -88,11 +88,17 @@ cOrange = (255, 100, 0)
 cYellow = (255, 255, 0)
 
 ####Pseudo-haptics dynamic parameters, k/b needs to be <1
-K = np.diag([0.2, 0.2])
-B = np.diag([0.3, 0.3])  # CANNOT BE ZERO
+K = np.diag([0.1, 0.1])
+B = np.diag([0.2, 0.2])  # CANNOT BE ZERO
+
+# Variables to determine input scaling and dead zone
+ongoingInput = False
+timerInput = 0
+timetilMaxThrust = 3
+K_gain = 1
+r_dead = 20
 
 ##################### Define sprites #####################
-
 ##define sprites
 hhandle = pygame.image.load('haply_sim/handle.png')
 haptic = pygame.Rect(*screenHaptics.get_rect().center, 0, 0).inflate(48, 48)
@@ -230,9 +236,22 @@ while run:
     ######### Compute forces ########
     xc, yc = screenHaptics.get_rect().center ##center of the screen
     
-    ######### Compute forces ########
-    fe += K @ (xh - np.array([xc, yc])) / window_scale
+    dist_center = xh - np.array([xc, yc])
+    
 
+    if np.linalg.norm(dist_center) > r_dead:
+        # Toggle ongoing Input
+        ongoingInput = True
+        ######### Compute forces ########
+        if ongoingInput:
+            timerInput += 1/FPS
+            K_gain =  1 + 5 * np.exp(-timerInput)
+    else:
+        timerInput = 0
+        ongoingInput = False
+        K_gain = 1
+    
+    fe += (K_gain * K) @ (dist_center) / window_scale
     '''*********** !Student should fill in ***********'''
     ##Update old samples for velocity computation
     xhold = xh
@@ -284,9 +303,10 @@ while run:
     ##Print status in  overlay
     if debugToggle:
         text = font.render("FPS = " + str(round(clock.get_fps())) +
-                           "  xm = " + str(np.round(10 * xm) / 10) +
+                           #"  xm = " + str(np.round(10 * xm) / 10) +
                            "  xh = " + str(np.round(10 * xh) / 10) +
-                           "  fe = " + str(np.round(10 * fe) / 10)
+                           "  K = " + str(np.round(K_gain * K, 2) ) +
+                           " fe= " + str(np.round(fe * 10) / 10)
                            , True, (0, 0, 0), (255, 255, 255))
         window.blit(text, textRect)
 
