@@ -65,7 +65,9 @@ control_radius = 25
 START_TIME = None
 TIME_ALIVE = 0
 ASTEROIDS_HIT = 0
+SAUCERS_HIT = 0
 SCORE = 0
+POSITIONS = []
 DISTANCE_TRAVELLED = 0
 
 
@@ -385,6 +387,9 @@ class Player:
 def gameLoop(startingState):
     global START_TIME
     global SCORE
+    global ASTEROIDS_HIT
+    global SAUCERS_HIT
+    global POSITIONS
 
     # Init variables
     gameState = startingState
