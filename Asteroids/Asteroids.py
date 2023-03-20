@@ -6,6 +6,7 @@ import struct
 import random
 import socket
 import os
+import time
 
 x = 20
 y = 150
@@ -59,6 +60,13 @@ window_scale = 800
 vector_1 = np.array([xc, yc])
 trans_matrix = np.array([[1.33, 0], [0, 1.5]])
 control_range = 10
+
+# Analysis variables
+START_TIME = None
+TIME_ALIVE = 0
+ASTEROIDS_HIT = 0
+SCORE = 0
+DISTANCE_TRAVELLED = 0
 
 
 # Create function to draw texts
@@ -375,6 +383,9 @@ class Player:
 
 
 def gameLoop(startingState):
+    global START_TIME
+    global SCORE
+
     # Init variables
     gameState = startingState
     player_state = "Alive"
@@ -388,7 +399,7 @@ def gameLoop(startingState):
     bullets = []
     asteroids = []
     stage = 3
-    score = 0
+    SCORE = 0
     live = 2
     oneUp_multiplier = 1
     playOneUpSFX = 0
@@ -423,6 +434,7 @@ def gameLoop(startingState):
                     gameState = "Exit"
                 if event.type == pygame.KEYDOWN:
                     gameState = "Playing"
+                    START_TIME = time.time()
             pygame.display.update()
             timer.tick(5)
 
@@ -431,9 +443,7 @@ def gameLoop(startingState):
             if event.type == pygame.QUIT:
                 gameState = "Exit"
                 if gameState == "Game Over":
-                    if event.key == pygame.K_r:
-                        gameState = "Exit"
-                        gameLoop("Playing")
+                    gameState = "Exit"
                 if event.key == pygame.K_LSHIFT:
                     hyperspace = 30
             elif event.type == pygame.KEYUP:
@@ -503,17 +513,17 @@ def gameLoop(startingState):
                     if a.t == "Large":
                         asteroids.append(Asteroid(a.x, a.y, "Normal"))
                         asteroids.append(Asteroid(a.x, a.y, "Normal"))
-                        score += 20
+                        SCORE += 20
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangL)
                     elif a.t == "Normal":
                         asteroids.append(Asteroid(a.x, a.y, "Small"))
                         asteroids.append(Asteroid(a.x, a.y, "Small"))
-                        score += 50
+                        SCORE += 50
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangM)
                     else:
-                        score += 100
+                        SCORE += 100
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangS)
                     asteroids.remove(a)
@@ -550,7 +560,7 @@ def gameLoop(startingState):
             if random.randint(0, 6000) <= (intensity * 2) / (stage * 9) and next_level_delay == 0:
                 saucer.createSaucer()
                 # Only small saucers >40000
-                if score >= 40000:
+                if SCORE >= 40000:
                     saucer.type = "Small"
         else:
             # Set saucer targer dir
@@ -588,9 +598,9 @@ def gameLoop(startingState):
                 if isColliding(b.x, b.y, saucer.x, saucer.y, saucer.size):
                     # Add points
                     if saucer.type == "Large":
-                        score += 200
+                        SCORE += 200
                     else:
-                        score += 1000
+                        SCORE += 1000
 
                     # Set saucer state
                     saucer.state = "Dead"
@@ -699,17 +709,17 @@ def gameLoop(startingState):
                     if a.t == "Large":
                         asteroids.append(Asteroid(a.x, a.y, "Normal"))
                         asteroids.append(Asteroid(a.x, a.y, "Normal"))
-                        score += 20
+                        SCORE += 20
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangL)
                     elif a.t == "Normal":
                         asteroids.append(Asteroid(a.x, a.y, "Small"))
                         asteroids.append(Asteroid(a.x, a.y, "Small"))
-                        score += 50
+                        SCORE += 50
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangM)
                     else:
-                        score += 100
+                        SCORE += 100
                         # Play SFX
                         pygame.mixer.Sound.play(snd_bangS)
                     asteroids.remove(a)
@@ -725,7 +735,7 @@ def gameLoop(startingState):
                     continue
 
         # Extra live
-        if score > oneUp_multiplier * 10000:
+        if SCORE > oneUp_multiplier * 10000:
             oneUp_multiplier += 1
             live += 1
             playOneUpSFX = 60
@@ -750,12 +760,13 @@ def gameLoop(startingState):
             else:
                 player.drawPlayer()
         else:
+            break
             drawText("Game Over", white, display_width / 2, display_height / 2, 100)
             drawText("Press \"R\" to restart!", white, display_width / 2, display_height / 2 + 100, 50)
             live = -1
 
-        # Draw score
-        drawText(str(score), white, 60, 20, 40, False)
+        # Draw SCORE
+        drawText(str(SCORE), white, 60, 20, 40, False)
 
         # Draw Lives
         for l in range(live + 1):
@@ -776,6 +787,10 @@ def gameLoop(startingState):
 
 # Start game
 gameLoop("Menu")
+
+TIME_ALIVE = time.time() - START_TIME
+print("TIME ALIVE: {t}".format(t=TIME_ALIVE))
+print("SCORE: {s}".format(s=SCORE))
 
 # Close all sockets, and send that you are closing to the receiving end
 send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50504))
