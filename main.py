@@ -3,7 +3,7 @@ import os
 
 # Creating the tuple of all the processes
 all_processes = ('Asteroids/Asteroids.py', 'haply_sim/haply.py')
-python_path = 'C:/Users/jelme/anaconda3/envs/hri/python.exe'  # Put YOUR CONDA PATH or 'python' for default here
+python_path = 'python'  # Put YOUR CONDA PATH or 'python' for default here
 
 
 # This block of code enables us to call the script from command line.                                                                                

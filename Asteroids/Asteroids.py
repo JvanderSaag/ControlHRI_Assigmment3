@@ -7,6 +7,7 @@ import random
 import socket
 import os
 import time
+import datetime
 
 x = 20
 y = 150
@@ -72,6 +73,15 @@ SCORE = 0
 POSITIONS = []
 VELOCITIES = []
 DISTANCE_TRAVELLED = None
+
+# Trials configuration variables
+trial_folder_path = "trials/"
+participant_number = "TEST/"
+# participant_number = "1/"
+date_and_time = str(datetime.datetime.now())
+output_filepath = trial_folder_path + participant_number + date_and_time
+os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
+print("TRIAL WILL BE WRITTEN TO: ", output_filepath)
 
 
 def calculate_distance(positions):
@@ -836,7 +846,16 @@ print("SAUCERS HIT: {sauce_hit}".format(sauce_hit=SAUCERS_HIT))
 print("DISTANCE TRAVELLED: {dist}".format(dist=DISTANCE_TRAVELLED))
 print("MAX VELOCITY: {max_vel}".format(max_vel=MAX_VELOCITY))
 
-# TODO write these to a file specified before the run
+
+outfile = open(output_filepath + ".txt", 'w')
+outfile.write('TIME_ALIVE, {0}\n'
+              'SCORE, {1}\n'
+              'ASTEROIDS HIT, {2}\n'
+              'SAUCERS_HIT, {3}\n'
+              'DISTANCE_TRAVELLED, {4}\n'
+              'MAX_VELOCITY, {5}'.format(TIME_ALIVE, SCORE, ASTEROIDS_HIT,
+                                         SAUCERS_HIT, DISTANCE_TRAVELLED, MAX_VELOCITY))
+outfile.close()
 
 # Close all sockets, and send that you are closing to the receiving end
 send_force.sendto("close".encode('utf-8'), ("127.0.0.1", 50504))
