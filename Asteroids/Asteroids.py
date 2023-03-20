@@ -24,7 +24,7 @@ display_height = 600
 
 player_size = 10
 fd_fric = 0.2
-bd_fric = 0.3
+bd_fric = 0.4
 player_max_speed = 10
 player_max_rtspd = 15
 bullet_speed = 15
@@ -59,7 +59,7 @@ xc, yc = gameDisplay.get_rect().center  # window center
 window_scale = 800
 vector_1 = np.array([xc, yc])
 trans_matrix = np.array([[1.33, 0], [0, 1.5]])
-control_radius = 25
+radius = 30
 
 # Analysis variables
 START_TIME = None
@@ -461,7 +461,7 @@ def gameLoop(startingState):
         dx = abs(vector_2[0] - xc)
         dy = abs(vector_2[1] - yc)
 
-        if dx > control_radius or dy > control_radius:
+        if dx > radius or dy > radius or dx**2 + dy**2 > radius**2:
             player.thrust = True
         else:
             player.thrust = False
