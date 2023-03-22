@@ -75,10 +75,15 @@ VELOCITIES = []
 DISTANCE_TRAVELLED = None
 
 # Trials configuration variables
-trial_folder_path = "trials/"
-participant_number = "TEST/"
-# participant_number = "1/"
-date_and_time = str(datetime.datetime.now())
+haptic_feedback = True
+if haptic_feedback == True:
+    haptic_path = "with_haptics/"
+else:
+    haptic_path = "without_haptics/"
+trial_folder_path = "trials/" + haptic_path
+participant_number = "1/"
+
+date_and_time = str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 output_filepath = trial_folder_path + participant_number + date_and_time
 os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
 print("TRIAL WILL BE WRITTEN TO: ", output_filepath)

@@ -240,7 +240,7 @@ while run:
     if np.linalg.norm(dist_center) > r_dead:
         ######### Compute forces ########
         if np.linalg.norm(force) != 0:
-            proj_vel = -0.2*(np.dot(force, fe)/np.linalg.norm(fe)**2)*fe
+            proj_vel = -0.3*(np.dot(force, fe)/np.linalg.norm(fe)**2)*fe
             fe += proj_vel
 
         # timerInput += 1/FPS
@@ -296,11 +296,12 @@ while run:
     pygame.draw.line(screenHaptics, (0, 0, 0), (haptic.center), (haptic.center + 2 * np.linalg.norm(K) * (xm - xh)))
    
     # Velocity visualisation
-    pygame.draw.line(screenHaptics, (255, 0, 0), haptic.center, (haptic.center + 5*force), 5)
-    try:
-        pygame.draw.line(screenHaptics, (0, 0, 255), haptic.center, (haptic.center + 10*proj_vel), 5)
-    except:
-        pass
+    if debugToggle:
+        pygame.draw.line(screenHaptics, (255, 0, 0), haptic.center, (haptic.center + 10*force), 5)
+        try:
+            pygame.draw.line(screenHaptics, (0, 0, 255), haptic.center, (haptic.center + 20*proj_vel), 5)
+        except:
+            pass
     ##Fuse it back together
     window.blit(screenHaptics, (0, 0))
 
